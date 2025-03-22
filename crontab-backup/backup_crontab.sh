@@ -5,7 +5,7 @@
 # Intended for Linux/macOS systems using crontab.
 # Edit BACKUP_DIR as needed.
 
-BACKUP_DIR="$HOME/Backups/System/crontab_backups"
+BACKUP_DIR="$HOME/Change/To/Your/Directory/file.sh"
 TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S")
 FILENAME="crontab_backup_$TIMESTAMP.txt"
 
