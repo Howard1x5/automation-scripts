@@ -1,90 +1,109 @@
-```
 # Clipboard Logger with SQLite
 
-This project contains a small Python script that continuously monitors your system clipboard and logs any new text entries into a local SQLite database. It’s useful for reviewing or searching past clipboard history.
+This project contains a small Python tool that continuously monitors your system clipboard and logs new text entries into a local SQLite database. It’s useful for reviewing or searching past clipboard history.
 
 ---
 
 ## Features
 
-- **Real-Time Monitoring**: The script detects clipboard changes in real time.
-- **SQLite Storage**: Logs are stored in `clipboard.db`, including timestamps for each entry.
-- **Easy Queries**: You can sort or filter logs by date or alphabetically (using either the included utility functions or SQLite CLI).
-- **Cross-Platform**: Works on Windows, macOS, and Linux (with [pyperclip](https://pypi.org/project/pyperclip/)).
+- **Real-Time Monitoring**: Detects clipboard changes in real time.
+- **SQLite Storage**: Logs entries in a lightweight database (`clipboard.db`), with timestamps for each entry.
+- **Query and Sorting**: Includes a script to query logs, sorted by date or alphabetically.
+- **Pruning Old Data**: An optional script allows you to delete entries older than a specified number of days.
+- **(Optional) Sensitive Data Masking**: Demonstrates how to redact or skip certain data patterns (e.g., passwords).
 
 ---
 
 ## Requirements
 
-- Python 3.7+  
-- [pyperclip](https://pypi.org/project/pyperclip/) library for clipboard access  
-- SQLite (built into Python’s standard library)
+- **Python 3.7+**  
+- **pyperclip** for clipboard access (`pip install pyperclip`)
+- **sqlite3** (builtin with Python)
+- *(Optional)* [pynput](https://pypi.org/project/pynput/) if you want to add hotkey functionality
 
 Install dependencies via:
 
-```
+```bash
 pip install pyperclip
-```
 
-Or if you have a `requirements.txt`:
+Or, if you have a requirements.txt:
 
-```
 pip install -r requirements.txt
-```
 
----
+Usage
+1. Run the Clipboard Logger
 
-## Usage
+    Clone or download this repository.
 
-1. **Clone/Download** this repository.
-2. **Navigate** to the `clipboard-logger` folder (or wherever you placed the script).
-3. **Run** the Python script:
-   ```
-   python clipboard_logger.py
-   ```
-   The script will:
-   - Initialize/verify `clipboard.db` exists.
-   - Enter an infinite loop, checking the clipboard for changes.
-   - Insert new clipboard text and a timestamp into the database whenever it detects new content.
-4. **Stop** the script at any time by pressing `Ctrl + C`.
+    Navigate to the folder (e.g., clipboard-logger).
 
----
+    (Optional) Create & activate a Python virtual environment:
 
-## Viewing Logs
+python3 -m venv venv
+source venv/bin/activate
 
-1. **Directly via SQLite CLI**:
-   ```
-   sqlite3 clipboard.db "SELECT * FROM clipboard_logs;"
-   ```
-   - Sort by content alphabetically:
-     ```
-     sqlite3 clipboard.db "SELECT * FROM clipboard_logs ORDER BY content ASC;"
-     ```
-   - Sort by date/time:
-     ```
-     sqlite3 clipboard.db "SELECT * FROM clipboard_logs ORDER BY timestamp ASC;"
-     ```
-2. **Python Utility**:
-   - You can create or use a separate Python script to query and sort the logs (examples in the repo).
-   - Example snippet:
-     ```python
-     import sqlite3
-     def get_logs(db_name="clipboard.db"):
-         conn = sqlite3.connect(db_name)
-         cursor = conn.cursor()
-         cursor.execute("SELECT * FROM clipboard_logs ORDER BY timestamp ASC;")
-         rows = cursor.fetchall()
-         conn.close()
-         return rows
-     ```
+Install dependencies:
 
----
+pip install pyperclip
 
-## Roadmap
+Run the logger:
 
-- **Duplicate Filtering**: Optionally skip logging repeated content within a set timeframe.
-- **Sensitive Data Masking**: Detect and redact potential secrets (e.g., passwords).
-- **GUI or CLI Query**: Add a user-friendly interface for searching, sorting, or exporting logs.
-- **Tray/Background Service**: Convert to a daemon or system tray app for always-on logging without a visible terminal.
+    python clipboard_logger.py
 
----
+    This starts an infinite loop that checks the clipboard every second.
+
+To stop the script at any time, press Ctrl + C in the terminal window.
+2. Query Logs
+
+Use query_logs.py to list entries from the database in different orders:
+
+python query_logs.py [alphabetical|timestamp]
+
+    alphabetical: Sorts entries by the content column.
+
+    timestamp (default): Sorts entries by the time they were logged (oldest to newest).
+
+For example:
+
+python query_logs.py alphabetical
+
+displays all entries sorted by their text content alphabetically.
+3. Prune Old Logs
+
+Use prune_old_logs.py to remove entries older than a specified number of days:
+
+python prune_old_logs.py [days]
+
+    If you provide no argument, it defaults to 7 days.
+
+    For example:
+
+    python prune_old_logs.py 30
+
+    will delete entries older than 30 days.
+
+Viewing Logs Directly
+
+If preferred, you can still open clipboard.db via the SQLite CLI:
+
+sqlite3 clipboard.db "SELECT * FROM clipboard_logs;"
+
+    Sort by content alphabetically:
+
+sqlite3 clipboard.db "SELECT * FROM clipboard_logs ORDER BY content ASC;"
+
+Sort by timestamp:
+
+    sqlite3 clipboard.db "SELECT * FROM clipboard_logs ORDER BY timestamp ASC;"
+
+Roadmap
+
+    Duplicate Filtering: Optionally skip logging repeated content within a short time window.
+
+    Sensitive Data Masking: Detect and redact potential secrets or high-entropy strings.
+
+    Hotkey Support: Add a hotkey to remove the last entry from the DB if you accidentally capture a password.
+
+    Background Service: Turn this script into a system daemon so it runs without an open terminal.
+
+    GUI: Create a small interface to display, search, or recopy past entries.
